@@ -1,0 +1,285 @@
+definitions:
+  models.CreateUserInput:
+    properties:
+      email:
+        example: efren@example.com
+        type: string
+      full_name:
+        example: Efren David
+        type: string
+      password:
+        example: miPasswordSeguro123
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    type: object
+  models.GeminiProcessingFileIDResponse:
+    properties:
+      task_id:
+        example: 8b9a1d2e-3c4f-5a6b-7c8d-9e0f1a2b3c4d
+        type: string
+    type: object
+  models.GeminiProcessingFileResponse:
+    properties:
+      error:
+        type: string
+      id:
+        type: string
+      result:
+        type: string
+      status:
+        $ref: '#/definitions/models.GeminiProcessingStatus'
+    type: object
+  models.GeminiProcessingIDResponse:
+    properties:
+      task_id:
+        example: 8b9a1d2e-3c4f-5a6b-7c8d-9e0f1a2b3c4d
+        type: string
+    type: object
+  models.GeminiProcessingResponse:
+    properties:
+      error:
+        type: string
+      id:
+        example: 8b9a1d2e-3c4f-5a6b-7c8d-9e0f1a2b3c4d
+        type: string
+      result:
+        example: Sí, existen varias becas...
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/models.GeminiProcessingStatus'
+        example: finalizado
+    type: object
+  models.GeminiProcessingStatus:
+    enum:
+    - pendiente
+    - en_proceso
+    - finalizado
+    - error
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusProcessing
+    - StatusCompleted
+    - StatusError
+  models.PromptRequest:
+    properties:
+      prompt:
+        example: Conoces las becas para Finlandia?
+        type: string
+    required:
+    - prompt
+    type: object
+  models.User:
+    properties:
+      email:
+        example: efren@example.com
+        type: string
+      full_name:
+        example: Efren David
+        type: string
+      id:
+        example: 1
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /gemini/process:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Prompt a procesar
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/models.PromptRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.GeminiProcessingIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar procesamiento de prompt
+      tags:
+      - gemini
+  /gemini/process-file:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Prompt
+        in: formData
+        name: prompt
+        required: true
+        type: string
+      - description: Archivo (pdf/png/jpg)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.GeminiProcessingFileIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar procesamiento con archivo
+      tags:
+      - gemini
+  /gemini/status-file/{gemini_processing_id}:
+    get:
+      parameters:
+      - description: ID del proceso
+        in: path
+        name: gemini_processing_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GeminiProcessingFileResponse'
+      summary: Obtener estado de procesamiento de archivo
+      tags:
+      - gemini
+  /gemini/status/{gemini_processing_id}:
+    get:
+      parameters:
+      - description: ID del proceso
+        in: path
+        name: gemini_processing_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GeminiProcessingResponse'
+      summary: Obtener estado de procesamiento
+      tags:
+      - gemini
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Obtener todos los usuarios
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Datos para crear usuario
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Crear usuario
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Eliminar usuario
+      tags:
+      - users
+    get:
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Obtener usuario por ID
+      tags:
+      - users
+    put:
+      parameters:
+      - description: ID del usuario
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos para actualizar usuario
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Actualizar usuario
+      tags:
+      - users
+swagger: "2.0"
