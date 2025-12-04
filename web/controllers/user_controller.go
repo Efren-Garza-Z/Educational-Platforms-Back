@@ -66,6 +66,7 @@ func (uc *UserController) GetAll(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} models.User
 // @Router /users/{id} [get]
+// @security ApiKeyAuth
 func (uc *UserController) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 32)
@@ -88,6 +89,7 @@ func (uc *UserController) GetByID(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} models.User
 // @Router /users/{id} [put]
+// @security ApiKeyAuth
 func (uc *UserController) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 32)
@@ -113,6 +115,7 @@ func (uc *UserController) Update(c *gin.Context) {
 // @Param id path int true "ID del usuario"
 // @Success 204
 // @Router /users/{id} [delete]
+// @security ApiKeyAuth
 func (uc *UserController) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 32)

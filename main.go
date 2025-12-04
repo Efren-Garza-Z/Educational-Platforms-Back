@@ -16,6 +16,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Escriba 'Bearer' seguido de un espacio y luego el token JWT. Ejemplo: "Bearer eyJhbGciOiJIUzI1NiIsInR5c..."
 func main() {
 	// carga .env si usas godotenv en runtime
 	// _ = godotenv.Load()
@@ -38,6 +42,7 @@ func main() {
 	// Controllers
 	userCtrl := controllers.NewUserController(userSvc, db.DB)
 	gemCtrl := controllers.NewGeminiController(gemSvc)
+	authCtrl := controllers.NewAuthController(userSvc)
 
 	// Gin
 	r := gin.Default()
@@ -48,6 +53,7 @@ func main() {
 	// Routes
 	routes.RegisterUserRoutes(r, userCtrl)
 	routes.RegisterGeminiRoutes(r, gemCtrl)
+	routes.RegisterAuthRoutes(r, authCtrl)
 
 	port := os.Getenv("PORT")
 	if port == "" {

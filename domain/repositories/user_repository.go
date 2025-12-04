@@ -11,6 +11,7 @@ type UserRepository interface {
 	Create(user *models.UserDB) error
 	FindAll() ([]models.UserDB, error)
 	FindByID(id uint) (*models.UserDB, error)
+	FindUserByEmail(email string) (*models.UserDB, error)
 	Update(user *models.UserDB) error
 	Delete(id uint) error
 }
@@ -43,6 +44,24 @@ func (r *userRepository) FindByID(id uint) (*models.UserDB, error) {
 		}
 		return nil, err
 	}
+	return &user, nil
+}
+
+func (r *userRepository) FindUserByEmail(email string) (*models.UserDB, error) {
+	var user models.UserDB
+
+	// Usamos GORM para buscar el primer registro donde el campo Email coincida.
+	err := r.db.Where("email = ?", email).First(&user).Error
+
+	if err != nil {
+		// Si no se encuentra el registro, devolvemos nil para el usuario, sin error.
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		// Cualquier otro error de base de datos
+		return nil, err
+	}
+
 	return &user, nil
 }
 
