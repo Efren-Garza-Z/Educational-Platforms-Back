@@ -29,7 +29,8 @@ func (GeminiProcessingDB) TableName() string {
 
 // DTOs para Swagger / responses
 type PromptRequest struct {
-	Prompt string `json:"prompt" example:"Conoces las becas para Finlandia?" binding:"required"`
+	Prompt         string `json:"prompt" example:"Conoces las becas para Finlandia?" binding:"required"`
+	ConversationID string `json:"conversation_id,omitempty"`
 }
 
 type GeminiProcessingIDResponse struct {

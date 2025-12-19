@@ -27,22 +27,25 @@ func main() {
 	db.Connect()
 
 	// Migraciones
-	if err := db.DB.AutoMigrate(&models.UserDB{}, &models.GeminiProcessingDB{}, &models.GeminiProcessingFileDB{}); err != nil {
+	if err := db.DB.AutoMigrate(&models.UserDB{}, &models.GeminiProcessingDB{}, &models.GeminiProcessingFileDB{}, &models.LearningInteractionDB{}); err != nil {
 		log.Fatalf("Error al migrar modelos: %v", err)
 	}
 
 	// Repositorios
 	userRepo := repositories.NewUserRepository(db.DB)
 	gemRepo := repositories.NewGeminiRepository(db.DB)
+	proRepo := repositories.NewProgressRepository(db.DB)
 
 	// Services
 	userSvc := service.NewUserService(userRepo)
-	gemSvc := service.NewGeminiService(gemRepo)
+	proSvc := service.NewProgressService(proRepo)
+	gemSvc := service.NewGeminiService(gemRepo, proSvc)
 
 	// Controllers
 	userCtrl := controllers.NewUserController(userSvc, db.DB)
 	gemCtrl := controllers.NewGeminiController(gemSvc)
 	authCtrl := controllers.NewAuthController(userSvc)
+	proCtrl := controllers.NewLearningController(gemSvc, userSvc, proSvc)
 
 	// Gin
 	r := gin.Default()
@@ -54,6 +57,7 @@ func main() {
 	routes.RegisterUserRoutes(r, userCtrl)
 	routes.RegisterGeminiRoutes(r, gemCtrl)
 	routes.RegisterAuthRoutes(r, authCtrl)
+	routes.RegisterLearningRoutes(r, proCtrl)
 
 	port := os.Getenv("PORT")
 	if port == "" {

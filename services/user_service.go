@@ -50,9 +50,11 @@ func (s *userService) CreateUser(input models.CreateUserInput) (*models.UserDB, 
 		return nil, err // Error al hashear
 	}
 	user := &models.UserDB{
-		FullName: input.FullName,
-		Email:    input.Email,
-		Password: hashedPassword, // ideal: hash aquí
+		FullName:       input.FullName,
+		Email:          input.Email,
+		Password:       hashedPassword, // ideal: hash aquí
+		TargetLanguage: input.TargetLanguage,
+		LanguageLevel:  input.LanguageLevel,
 	}
 	if err := s.repo.Create(user); err != nil {
 		return nil, err
@@ -85,6 +87,8 @@ func (s *userService) UpdateUser(id uint, input models.CreateUserInput) (*models
 	}
 	u.FullName = input.FullName
 	u.Email = input.Email
+	u.LanguageLevel = input.LanguageLevel
+	u.TargetLanguage = input.TargetLanguage
 
 	if input.Password != "" {
 		hashedPassword, err := s.hashPassword(input.Password)

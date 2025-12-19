@@ -11,6 +11,10 @@ type UserDB struct {
 	FullName string `json:"full_name" gorm:"not null" example:"Efren David"`
 	Email    string `json:"email" gorm:"uniqueIndex;not null" example:"efren@example.com"`
 	Password string `json:"password" gorm:"not null" example:"miPasswordSeguro123"`
+
+	// CAMPOS DE PERSONALIZACIÓN PARA LA IA
+	TargetLanguage string `json:"target_language" gorm:"default:'English'"`
+	LanguageLevel  string `json:"language_level" gorm:"default:'A1'"`
 }
 
 func (UserDB) TableName() string {
@@ -26,9 +30,11 @@ type User struct {
 
 // CreateUserInput es el payload esperado para crear usuarios.
 type CreateUserInput struct {
-	FullName string `json:"full_name" binding:"required" example:"Efren David"`
-	Email    string `json:"email" binding:"required,email" example:"efren@example.com"`
-	Password string `json:"password" binding:"required" example:"miPasswordSeguro123"`
+	FullName       string `json:"full_name" binding:"required" example:"Efren David"`
+	Email          string `json:"email" binding:"required,email" example:"efren@example.com"`
+	Password       string `json:"password" binding:"required" example:"miPasswordSeguro123"`
+	TargetLanguage string `json:"target_language" example:"English"`
+	LanguageLevel  string `json:"language_level" example:"A1"`
 }
 
 // ToPublic convierte UserDB a User (oculta password)

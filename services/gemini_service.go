@@ -18,17 +18,28 @@ import (
 type GeminiService interface {
 	ProcessPromptAsync(prompt string) (string, error)
 	GetProcessStatus(id string) (*models.GeminiProcessingDB, error)
+	ProcessChatAsync(
+		userID uint,
+		conversationID string,
+		lang string,
+		level string,
+		userPrompt string,
+	) (string, error)
 
 	ProcessFileAsync(prompt, filename, mimeType string, fileContent []byte) (string, error)
 	GetFileProcessStatus(id string) (*models.GeminiProcessingFileDB, error)
 }
 
 type geminiService struct {
-	repo repositories.GeminiRepository
+	repo            repositories.GeminiRepository
+	progressService ProgressService
 }
 
-func NewGeminiService(r repositories.GeminiRepository) GeminiService {
-	return &geminiService{repo: r}
+func NewGeminiService(r repositories.GeminiRepository, ps ProgressService) GeminiService {
+	return &geminiService{
+		repo:            r,
+		progressService: ps,
+	}
 }
 
 // newClient crea un cliente Gemini usando la variable de entorno GEMINI_API_KEY
@@ -76,6 +87,51 @@ func (s *geminiService) GenerateContent(prompt string) (string, error) {
 	}
 
 	return res.Text(), nil
+}
+
+func (s *geminiService) ProcessChatAsync(
+	userID uint,
+	conversationID string,
+	lang, level, userPrompt string,
+) (string, error) {
+
+	id := genUUID()
+
+	go func() {
+
+		// 1️⃣ Obtener historial previo
+		historyContext, err := s.progressService.BuildConversationContext(
+			userID,
+			conversationID,
+		)
+		if err != nil {
+			return
+		}
+
+		// 2️⃣ Construir prompt completo
+		fullPrompt := historyContext +
+			"\nStudent: " + userPrompt
+
+		aiResponse, err := s.GenerateContent(fullPrompt)
+		if err != nil {
+			return
+		}
+
+		// 3️⃣ Guardar interacción
+		_, _ = s.progressService.SaveInteraction(
+			models.LearningInteractionInput{
+				ConversationID:  conversationID,
+				UserID:          userID,
+				InteractionType: "Chat",
+				Language:        lang,
+				Level:           level,
+				Prompt:          userPrompt,
+				Response:        aiResponse,
+			},
+		)
+	}()
+
+	return id, nil
 }
 
 // GenerateWithFile llama al modelo Gemini subiendo un archivo
