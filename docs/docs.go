@@ -220,6 +220,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/learning/chat": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Iniciar tutoría de conversación con IA",
+                "parameters": [
+                    {
+                        "description": "Mensaje del estudiante",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PromptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/models.GeminiProcessingIDResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/learning/history": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "summary": "Obtener historial de aprendizaje",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.LearningInteractionDB"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "produces": [
@@ -421,9 +486,17 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Efren David"
                 },
+                "language_level": {
+                    "type": "string",
+                    "example": "A1"
+                },
                 "password": {
                     "type": "string",
                     "example": "miPasswordSeguro123"
+                },
+                "target_language": {
+                    "type": "string",
+                    "example": "English"
                 }
             }
         },
@@ -500,6 +573,45 @@ const docTemplate = `{
                 "StatusCompleted",
                 "StatusError"
             ]
+        },
+        "models.LearningInteractionDB": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interaction_type": {
+                    "description": "Ejemplo: Conversation, Grammar, Exercise",
+                    "type": "string",
+                    "example": "Correction"
+                },
+                "language": {
+                    "type": "string",
+                    "example": "French"
+                },
+                "level": {
+                    "type": "string",
+                    "example": "B2"
+                },
+                "prompt": {
+                    "type": "string",
+                    "example": "Write a dialogue about a train ticket."
+                },
+                "response": {
+                    "type": "string",
+                    "example": "Bonjour, je voudrais acheter un billet."
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "Clave Foránea al usuario",
+                    "type": "integer"
+                }
+            }
         },
         "models.LoginInput": {
             "type": "object",

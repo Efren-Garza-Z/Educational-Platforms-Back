@@ -18,8 +18,14 @@ definitions:
       full_name:
         example: Efren David
         type: string
+      language_level:
+        example: A1
+        type: string
       password:
         example: miPasswordSeguro123
+        type: string
+      target_language:
+        example: English
         type: string
     required:
     - email
@@ -76,6 +82,34 @@ definitions:
     - StatusProcessing
     - StatusCompleted
     - StatusError
+  models.LearningInteractionDB:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      interaction_type:
+        description: 'Ejemplo: Conversation, Grammar, Exercise'
+        example: Correction
+        type: string
+      language:
+        example: French
+        type: string
+      level:
+        example: B2
+        type: string
+      prompt:
+        example: Write a dialogue about a train ticket.
+        type: string
+      response:
+        example: Bonjour, je voudrais acheter un billet.
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: Clave Foránea al usuario
+        type: integer
+    type: object
   models.LoginInput:
     properties:
       email:
@@ -244,6 +278,45 @@ paths:
       summary: Obtener estado de procesamiento
       tags:
       - gemini
+  /learning/chat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Mensaje del estudiante
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.PromptRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.GeminiProcessingIDResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Iniciar tutoría de conversación con IA
+      tags:
+      - learning
+  /learning/history:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.LearningInteractionDB'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener historial de aprendizaje
+      tags:
+      - learning
   /users:
     get:
       produces:

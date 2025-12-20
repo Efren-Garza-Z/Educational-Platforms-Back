@@ -71,3 +71,9 @@ Este comando buscará las anotaciones en tu código y creará o actualizará el 
 Una vez que la aplicación esté en funcionamiento, puedes acceder a la documentación interactiva en tu navegador:
 
 http://localhost:8080/swagger/index.html
+
+4. Pasos para logearse:
+Solución en Swagger UI
+En la configuración de Authorize de Swagger, cuando pegues el token (después de configurar el esquema ApiKeyAuth), debes ingresar la cadena completa:
+
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE3NjQ5MDc3MDks
