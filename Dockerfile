@@ -1,30 +1,26 @@
-# Cambiamos 1.21-alpine por alpine (que es la última versión estable)
-FROM golang:alpine AS builder
+# ---- Build stage ----
+FROM golang:1.25-alpine AS builder
 
-# Instalamos certificados y herramientas necesarias
-RUN apk update && apk add --no-cache ca-certificates git
+RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
 
-# Copiamos dependencias
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copiamos el resto del código
 COPY . .
 
-# Compilamos
-# Si tu main.go está en la raíz, deja el punto. 
-# Si está en /cmd, usa ./cmd/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app
 
-# --- Etapa de ejecución ---
+# ---- Runtime stage ----
 FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+
+RUN apk add --no-cache ca-certificates
 
 WORKDIR /root/
-COPY --from=builder /app/main .
+
+COPY --from=builder /app/app .
 
 EXPOSE 8080
 
-CMD ["./main"]
+CMD ["./app"]
