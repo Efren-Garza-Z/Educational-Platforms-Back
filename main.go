@@ -24,7 +24,9 @@ func main() {
 	// carga .env si usas godotenv en runtime
 	// _ = godotenv.Load()
 
+	log.Println("ANTES de db.Connect()")
 	db.Connect()
+	log.Println("DESPUÉS de db.Connect()")
 
 	// Migraciones
 	if err := db.DB.AutoMigrate(&models.UserDB{}, &models.GeminiProcessingDB{}, &models.GeminiProcessingFileDB{}, &models.LearningInteractionDB{}); err != nil {
