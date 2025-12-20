@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
+func Connect() error {
 	var dsn string
 
 	dbUser := os.Getenv("DB_USER")
@@ -19,10 +19,14 @@ func Connect() {
 	dbName := os.Getenv("DB_NAME")
 
 	if os.Getenv("K_SERVICE") != "" {
-		// CLOUD RUN (Cloud SQL vía TCP)
+		// CLOUD RUN - Cloud SQL Socket
+		instance := os.Getenv("DB_INSTANCE_CONNECTION_NAME")
 		dsn = fmt.Sprintf(
-			"host=127.0.0.1 user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=UTC",
-			dbUser, dbPass, dbName,
+			"host=/cloudsql/%s user=%s password=%s dbname=%s sslmode=disable",
+			instance,
+			dbUser,
+			dbPass,
+			dbName,
 		)
 	} else {
 		// LOCAL
@@ -34,20 +38,17 @@ func Connect() {
 		if port == "" {
 			port = "5432"
 		}
-
 		dsn = fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 			host, dbUser, dbPass, dbName, port,
 		)
 	}
 
-	log.Println("Conectando a DB...")
-
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error DB: %v", err)
+		return err
 	}
 
-	log.Println("DB conectada correctamente")
+	return nil
 }
