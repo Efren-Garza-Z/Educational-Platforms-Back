@@ -42,7 +42,9 @@ func Connect() {
 	}
 
 	log.Println("Conectando a DB...")
-	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	var err error
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error DB: %v", err)
 	}
