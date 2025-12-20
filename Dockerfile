@@ -1,32 +1,33 @@
-# Paso 1: Construir el binario de Go
+# --- PASO 1: Compilación ---
 FROM golang:1.21-alpine AS builder
 
-# Instalar git y certificados (necesarios para llamadas externas como Gemini)
-RUN apk add --no-cache git ca-certificates
+# apk update ayuda a refrescar los repositorios antes de instalar
+RUN apk update && apk add --no-cache ca-certificates
 
 WORKDIR /app
 
-# Copiar archivos de dependencias
+# Copiamos solo los archivos de dependencias primero (esto optimiza el cache)
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copiar todo el código fuente
+# Copiamos el resto del código
 COPY . .
 
-# Compilar el proyecto (asegúrate de que el archivo con la func main esté en la raíz o ajusta la ruta)
+# IMPORTANTE: Si tu archivo main.go está dentro de una carpeta (ej: cmd/main.go)
+# cambia el punto final por la ruta: RUN go build -o main ./cmd/main.go
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-# Paso 2: Crear la imagen ligera de ejecución
+# --- PASO 2: Imagen de ejecución ---
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-# Copiar el binario desde el constructor
+# Traemos el ejecutable desde el builder
 COPY --from=builder /app/main .
 
-# Exponer el puerto que usa Gin (normalmente 8080)
+# Exponemos el puerto estándar
 EXPOSE 8080
 
-# Ejecutar la aplicación
+# Comando para arrancar
 CMD ["./main"]
