@@ -14,54 +14,38 @@ var DB *gorm.DB
 func Connect() {
 	var dsn string
 
-	// K_SERVICE es una variable automática de Cloud Run
-	if os.Getenv("K_SERVICE") != "" {
-		// CONFIGURACIÓN PARA PRODUCCIÓN (GCP - Unix Sockets)
-		dbUser := os.Getenv("DB_USER")
-		dbPass := os.Getenv("DB_PASSWORD")
-		dbName := os.Getenv("DB_NAME")
-		instanceConnectionName := os.Getenv("INSTANCE_CONNECTION_NAME")
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
 
-		// Agregamos TimeZone=UTC para consistencia total
-		dsn = fmt.Sprintf("user=%s password=%s dbname=%s host=/cloudsql/%s sslmode=disable TimeZone=UTC",
-			dbUser, dbPass, dbName, instanceConnectionName)
+	if os.Getenv("K_SERVICE") != "" {
+		// CLOUD RUN (Cloud SQL vía TCP)
+		dsn = fmt.Sprintf(
+			"host=127.0.0.1 user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=UTC",
+			dbUser, dbPass, dbName,
+		)
 	} else {
-		// CONFIGURACIÓN PARA LOCAL
+		// LOCAL
 		host := os.Getenv("DB_HOST")
 		if host == "" {
 			host = "localhost"
-		}
-		user := os.Getenv("DB_USER")
-		if user == "" {
-			user = "edgz"
-		}
-		password := os.Getenv("DB_PASSWORD")
-		if password == "" {
-			password = "1234"
-		}
-		dbname := os.Getenv("DB_NAME")
-		if dbname == "" {
-			dbname = "edgz"
 		}
 		port := os.Getenv("DB_PORT")
 		if port == "" {
 			port = "5432"
 		}
 
-		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-			host, user, password, dbname, port)
+		dsn = fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
+			host, dbUser, dbPass, dbName, port,
+		)
 	}
 
-	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	log.Println("Conectando a DB...")
+	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error al conectar a la base de datos: %v", err)
+		log.Fatalf("Error DB: %v", err)
 	}
 
-	// Aseguramos el schema para tus modelos personalizados
-	if err := DB.Exec("CREATE SCHEMA IF NOT EXISTS service;").Error; err != nil {
-		log.Printf("Aviso: No se pudo crear el schema 'service' (puede que ya exista o no tengas permisos): %v", err)
-	}
-
-	log.Println("Conexión a la base de datos exitosa")
+	log.Println("DB conectada correctamente")
 }
