@@ -72,7 +72,7 @@ func (s *geminiService) GenerateContent(prompt string) (string, error) {
 	}
 
 	// Modelo base de Gemini
-	model := "gemini-2.5-flash"
+	model := "gemini-3-flash-preview"
 
 	chat, err := client.Chats.Create(ctx, model, &genai.GenerateContentConfig{
 		Temperature: genai.Ptr[float32](0.5),
