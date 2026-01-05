@@ -357,6 +357,37 @@ const docTemplate = `{
             }
         },
         "/users/email/{email}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Obtener usuario por Email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email del usuario",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -389,39 +420,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.CreateUserInput"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/{email}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Obtener usuario por Email",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Email del usuario",
-                        "name": "email",
-                        "in": "formData",
-                        "required": true
                     }
                 ],
                 "responses": {

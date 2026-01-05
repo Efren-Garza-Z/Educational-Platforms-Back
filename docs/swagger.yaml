@@ -368,26 +368,6 @@ paths:
       summary: Crear usuario
       tags:
       - users
-  /users/{email}:
-    get:
-      parameters:
-      - description: Email del usuario
-        in: formData
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-      security:
-      - ApiKeyAuth: []
-      summary: Obtener usuario por Email
-      tags:
-      - users
   /users/{id}:
     delete:
       parameters:
@@ -424,6 +404,25 @@ paths:
       tags:
       - users
   /users/email/{email}:
+    get:
+      parameters:
+      - description: Email del usuario
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener usuario por Email
+      tags:
+      - users
     put:
       consumes:
       - application/json

@@ -84,10 +84,10 @@ func (uc *UserController) GetByID(c *gin.Context) {
 
 // @Summary Obtener usuario por Email
 // @Tags users
-// @Param email formData string true "Email del usuario"
+// @Param email path string true "Email del usuario"
 // @Produce json
 // @Success 200 {object} models.User
-// @Router /users/{email} [get]
+// @Router /users/email/{email} [get]
 // @security ApiKeyAuth
 func (uc *UserController) GetByEmail(c *gin.Context) {
 	// 1. Obtener el email de la URL (el parámetro debe coincidir con el nombre en la ruta)
