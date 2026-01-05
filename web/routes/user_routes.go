@@ -16,8 +16,9 @@ func RegisterUserRoutes(r *gin.Engine, uc *controllers.UserController) {
 		authenticated.Use(middleware.AuthRequired()) // Aplicar el middleware a este grupo
 		{
 			authenticated.GET("/:id", uc.GetByID)
-			authenticated.PUT("/:id", uc.Update)
-			authenticated.DELETE("/:id", uc.Delete)
+			authenticated.PUT("/email/:email", uc.Update)
+			authenticated.DELETE("/id/:id", uc.Delete)
+			authenticated.GET("/email/:email", uc.GetByEmail)
 		}
 	}
 }

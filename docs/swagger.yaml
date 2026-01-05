@@ -84,6 +84,9 @@ definitions:
     - StatusError
   models.LearningInteractionDB:
     properties:
+      conversationID:
+        description: "\U0001F448 NUEVO"
+        type: string
       created_at:
         type: string
       id:
@@ -124,6 +127,8 @@ definitions:
     type: object
   models.PromptRequest:
     properties:
+      conversation_id:
+        type: string
       prompt:
         example: Conoces las becas para Finlandia?
         type: string
@@ -363,6 +368,26 @@ paths:
       summary: Crear usuario
       tags:
       - users
+  /users/{email}:
+    get:
+      parameters:
+      - description: Email del usuario
+        in: formData
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Obtener usuario por Email
+      tags:
+      - users
   /users/{id}:
     delete:
       parameters:
@@ -398,13 +423,16 @@ paths:
       summary: Obtener usuario por ID
       tags:
       - users
+  /users/email/{email}:
     put:
+      consumes:
+      - application/json
       parameters:
-      - description: ID del usuario
+      - description: Email del usuario
         in: path
-        name: id
+        name: email
         required: true
-        type: integer
+        type: string
       - description: Datos para actualizar usuario
         in: body
         name: input
@@ -425,8 +453,6 @@ paths:
       - users
 securityDefinitions:
   ApiKeyAuth:
-    description: 'Escriba ''Bearer'' seguido de un espacio y luego el token JWT. Ejemplo:
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5c..."'
     in: header
     name: Authorization
     type: apiKey

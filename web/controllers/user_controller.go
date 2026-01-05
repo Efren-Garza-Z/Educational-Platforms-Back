@@ -82,31 +82,61 @@ func (uc *UserController) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, u.ToPublic())
 }
 
-// @Summary Actualizar usuario
+// @Summary Obtener usuario por Email
 // @Tags users
-// @Param id path int true "ID del usuario"
-// @Param input body models.CreateUserInput true "Datos para actualizar usuario"
+// @Param email formData string true "Email del usuario"
 // @Produce json
 // @Success 200 {object} models.User
-// @Router /users/{id} [put]
+// @Router /users/{email} [get]
+// @security ApiKeyAuth
+func (uc *UserController) GetByEmail(c *gin.Context) {
+	// 1. Obtener el email de la URL (el parámetro debe coincidir con el nombre en la ruta)
+	email := c.Param("email")
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El email es requerido"})
+		return
+	}
+
+	u, err := uc.service.GetUser(email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, u.ToPublic())
+}
+
+// @Summary Actualizar usuario
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param email path string true "Email del usuario"
+// @Param input body models.CreateUserInput true "Datos para actualizar usuario"
+// @Success 200 {object} models.User
+// @Router /users/email/{email} [put]
 // @security ApiKeyAuth
 func (uc *UserController) Update(c *gin.Context) {
-	idStr := c.Param("id")
-	id64, err := strconv.ParseUint(idStr, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+	// 1. Obtener el email de la URL (el parámetro debe coincidir con el nombre en la ruta)
+	email := c.Param("email")
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El email es requerido"})
 		return
 	}
+
+	// 2. Validar el cuerpo de la solicitud (JSON)
 	var input models.CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos: " + err.Error()})
 		return
 	}
-	u, err := uc.service.UpdateUser(uint(id64), input)
+
+	// 3. Llamar al servicio usando el email
+	u, err := uc.service.UpdateUser(email, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// 4. Responder con el modelo público (para no mostrar contraseñas)
 	c.JSON(http.StatusOK, u.ToPublic())
 }
 

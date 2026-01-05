@@ -17,8 +17,9 @@ type UserService interface {
 	CreateUser(input models.CreateUserInput) (*models.UserDB, error)
 	GetAllUsers() ([]models.UserDB, error)
 	GetUserByID(id uint) (*models.UserDB, error)
+	GetUser(email string) (*models.UserDB, error)
 	FindUserByEmail(email string) (*models.UserDB, error)
-	UpdateUser(id uint, input models.CreateUserInput) (*models.UserDB, error)
+	UpdateUser(email string, input models.CreateUserInput) (*models.UserDB, error)
 	DeleteUser(id uint) error
 	Login(email, password string) (*models.UserDB, error)
 	GenerateJWT(user *models.UserDB) (string, error)
@@ -77,8 +78,19 @@ func (s *userService) GetUserByID(id uint) (*models.UserDB, error) {
 	return u, nil
 }
 
-func (s *userService) UpdateUser(id uint, input models.CreateUserInput) (*models.UserDB, error) {
-	u, err := s.repo.FindByID(id)
+func (s *userService) GetUser(email string) (*models.UserDB, error) {
+	u, err := s.repo.FindUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	if u == nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+	return u, nil
+}
+
+func (s *userService) UpdateUser(email string, input models.CreateUserInput) (*models.UserDB, error) {
+	u, err := s.repo.FindUserByEmail(email)
 	if err != nil {
 		return nil, err
 	}
