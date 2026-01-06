@@ -135,6 +135,15 @@ definitions:
     required:
     - prompt
     type: object
+  models.UpdateLanguageInput:
+    properties:
+      language_level:
+        example: B2
+        type: string
+      target_language:
+        example: English
+        type: string
+    type: object
   models.User:
     properties:
       email:
@@ -448,6 +457,35 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Actualizar usuario
+      tags:
+      - users
+  /users/email/{email}/language:
+    patch:
+      consumes:
+      - application/json
+      description: Actualiza únicamente el idioma objetivo y el nivel del usuario.
+      parameters:
+      - description: Email del usuario
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: Datos de idioma
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateLanguageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - ApiKeyAuth: []
+      summary: Actualizar configuración de idioma
       tags:
       - users
 securityDefinitions:

@@ -19,6 +19,7 @@ func RegisterUserRoutes(r *gin.Engine, uc *controllers.UserController) {
 			authenticated.PUT("/email/:email", uc.Update)
 			authenticated.DELETE("/id/:id", uc.Delete)
 			authenticated.GET("/email/:email", uc.GetByEmail)
+			authenticated.PATCH("/email/:email/language", uc.UpdateLanguage)
 		}
 	}
 }

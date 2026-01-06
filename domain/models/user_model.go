@@ -37,6 +37,12 @@ type CreateUserInput struct {
 	LanguageLevel  string `json:"language_level" example:"A1"`
 }
 
+// UpdateLanguageInput es el payload esperado para crear usuarios.
+type UpdateLanguageInput struct {
+	TargetLanguage string `json:"target_language" example:"English"`
+	LanguageLevel  string `json:"language_level" example:"B2"`
+}
+
 // ToPublic convierte UserDB a User (oculta password)
 func (u *UserDB) ToPublic() User {
 	return User{

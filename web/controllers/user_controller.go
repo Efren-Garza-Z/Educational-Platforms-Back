@@ -159,3 +159,35 @@ func (uc *UserController) Delete(c *gin.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
+
+// @Summary Actualizar configuración de idioma
+// @Description Actualiza únicamente el idioma objetivo y el nivel del usuario.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param email path string true "Email del usuario"
+// @Param input body models.UpdateLanguageInput true "Datos de idioma"
+// @Success 200 {object} models.User
+// @Router /users/email/{email}/language [patch]
+// @security ApiKeyAuth
+func (uc *UserController) UpdateLanguage(c *gin.Context) {
+	email := c.Param("email")
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El email es requerido"})
+		return
+	}
+
+	var input models.UpdateLanguageInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		return
+	}
+
+	u, err := uc.service.UpdateLanguage(email, input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, u.ToPublic())
+}

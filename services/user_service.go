@@ -23,6 +23,7 @@ type UserService interface {
 	DeleteUser(id uint) error
 	Login(email, password string) (*models.UserDB, error)
 	GenerateJWT(user *models.UserDB) (string, error)
+	UpdateLanguage(email string, input models.UpdateLanguageInput) (*models.UserDB, error)
 }
 
 type userService struct {
@@ -188,4 +189,23 @@ func (s *userService) GenerateJWT(user *models.UserDB) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (s *userService) UpdateLanguage(email string, input models.UpdateLanguageInput) (*models.UserDB, error) {
+	u, err := s.repo.FindUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	if u == nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+
+	// Actualizamos solo los campos específicos
+	u.TargetLanguage = input.TargetLanguage
+	u.LanguageLevel = input.LanguageLevel
+
+	if err := s.repo.Update(u); err != nil {
+		return nil, err
+	}
+	return u, nil
 }

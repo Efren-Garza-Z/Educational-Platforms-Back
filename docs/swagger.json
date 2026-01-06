@@ -421,6 +421,52 @@
                 }
             }
         },
+        "/users/email/{email}/language": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Actualiza únicamente el idioma objetivo y el nivel del usuario.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Actualizar configuración de idioma",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email del usuario",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos de idioma",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateLanguageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "security": [
@@ -671,6 +717,19 @@
                 "prompt": {
                     "type": "string",
                     "example": "Conoces las becas para Finlandia?"
+                }
+            }
+        },
+        "models.UpdateLanguageInput": {
+            "type": "object",
+            "properties": {
+                "language_level": {
+                    "type": "string",
+                    "example": "B2"
+                },
+                "target_language": {
+                    "type": "string",
+                    "example": "English"
                 }
             }
         },
