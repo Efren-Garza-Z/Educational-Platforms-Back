@@ -26,6 +26,9 @@ type User struct {
 	ID       uint   `json:"id" example:"1"`
 	FullName string `json:"full_name" example:"Efren David"`
 	Email    string `json:"email" example:"efren@example.com"`
+
+	TargetLanguage string `json:"target_language" gorm:"default:'English'"`
+	LanguageLevel  string `json:"language_level" gorm:"default:'A1'"`
 }
 
 // CreateUserInput es el payload esperado para crear usuarios.
@@ -46,8 +49,10 @@ type UpdateLanguageInput struct {
 // ToPublic convierte UserDB a User (oculta password)
 func (u *UserDB) ToPublic() User {
 	return User{
-		ID:       u.ID,
-		FullName: u.FullName,
-		Email:    u.Email,
+		ID:             u.ID,
+		FullName:       u.FullName,
+		Email:          u.Email,
+		TargetLanguage: u.TargetLanguage,
+		LanguageLevel:  u.LanguageLevel,
 	}
 }
