@@ -129,6 +129,9 @@ definitions:
     properties:
       conversation_id:
         type: string
+      model:
+        example: gemini-3-flash-preview
+        type: string
       prompt:
         example: Conoces las becas para Finlandia?
         type: string
@@ -203,7 +206,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Prompt a procesar
+      - description: Prompt y modelo a procesar
         in: body
         name: requestBody
         required: true
@@ -234,6 +237,10 @@ paths:
         in: formData
         name: prompt
         required: true
+        type: string
+      - description: Modelo (opcional, por defecto gemini-3-flash-preview)
+        in: formData
+        name: model
         type: string
       - description: Archivo (pdf/png/jpg)
         in: formData
@@ -297,7 +304,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Mensaje del estudiante
+      - description: Mensaje del estudiante y modelo opcional
         in: body
         name: input
         required: true

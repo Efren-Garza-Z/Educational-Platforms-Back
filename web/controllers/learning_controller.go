@@ -31,7 +31,7 @@ func NewLearningController(
 // @Tags learning
 // @Accept json
 // @Produce json
-// @Param input body models.PromptRequest true "Mensaje del estudiante"
+// @Param input body models.PromptRequest true "Mensaje del estudiante y modelo opcional"
 // @Security ApiKeyAuth
 // @Success 202 {object} models.GeminiProcessingIDResponse
 // @Router /learning/chat [post]
@@ -79,6 +79,7 @@ func (lc *LearningController) ChatWithTutor(c *gin.Context) {
 		lang,
 		lvl,
 		req.Prompt,
+		req.Model,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al procesar con Gemini"})

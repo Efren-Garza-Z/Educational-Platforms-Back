@@ -31,6 +31,7 @@ func (GeminiProcessingDB) TableName() string {
 type PromptRequest struct {
 	Prompt         string `json:"prompt" example:"Conoces las becas para Finlandia?" binding:"required"`
 	ConversationID string `json:"conversation_id,omitempty"`
+	Model          string `json:"model" example:"gemini-3-flash-preview"`
 }
 
 type GeminiProcessingIDResponse struct {

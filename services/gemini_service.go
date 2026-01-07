@@ -16,7 +16,7 @@ import (
 
 // GeminiService coordina repo + llamada a Gemini
 type GeminiService interface {
-	ProcessPromptAsync(prompt string) (string, error)
+	ProcessPromptAsync(prompt string, model string) (string, error)
 	GetProcessStatus(id string) (*models.GeminiProcessingDB, error)
 	ProcessChatAsync(
 		userID uint,
@@ -24,9 +24,10 @@ type GeminiService interface {
 		lang string,
 		level string,
 		userPrompt string,
+		model string,
 	) (string, error)
 
-	ProcessFileAsync(prompt, filename, mimeType string, fileContent []byte) (string, error)
+	ProcessFileAsync(prompt, filename, mimeType string, fileContent []byte, model string) (string, error)
 	GetFileProcessStatus(id string) (*models.GeminiProcessingFileDB, error)
 }
 
@@ -64,7 +65,7 @@ func newClient(ctx context.Context) (*genai.Client, context.Context, error) {
 }
 
 // GenerateContent llama al modelo Gemini con texto (sin archivos)
-func (s *geminiService) GenerateContent(prompt string) (string, error) {
+func (s *geminiService) GenerateContent(prompt string, model string) (string, error) {
 	ctx := context.Background()
 	client, _, err := newClient(ctx)
 	if err != nil {
@@ -72,8 +73,10 @@ func (s *geminiService) GenerateContent(prompt string) (string, error) {
 	}
 
 	// Modelo base de Gemini
-	//model := "gemini-3-flash-preview"
-	model := "gemini-2.5-flash"
+	//model := "gemini-2.5-flash"
+	if model == "" {
+		model = "gemini-3-flash-preview"
+	}
 
 	chat, err := client.Chats.Create(ctx, model, &genai.GenerateContentConfig{
 		Temperature: genai.Ptr[float32](0.5),
@@ -94,6 +97,7 @@ func (s *geminiService) ProcessChatAsync(
 	userID uint,
 	conversationID string,
 	lang, level, userPrompt string,
+	model string,
 ) (string, error) {
 
 	id := genUUID()
@@ -113,7 +117,11 @@ func (s *geminiService) ProcessChatAsync(
 		fullPrompt := historyContext +
 			"\nStudent: " + userPrompt
 
-		aiResponse, err := s.GenerateContent(fullPrompt)
+		if model == "" {
+			model = "gemini-3-flash-preview"
+		}
+
+		aiResponse, err := s.GenerateContent(fullPrompt, model)
 		if err != nil {
 			return
 		}
@@ -136,7 +144,7 @@ func (s *geminiService) ProcessChatAsync(
 }
 
 // GenerateWithFile llama al modelo Gemini subiendo un archivo
-func (s *geminiService) GenerateWithFile(prompt string, fileReader io.Reader, filename, mimeType string) (string, error) {
+func (s *geminiService) GenerateWithFile(prompt string, fileReader io.Reader, filename, mimeType string, model string) (string, error) {
 	ctx := context.Background()
 	client, _, err := newClient(ctx)
 	if err != nil {
@@ -153,7 +161,10 @@ func (s *geminiService) GenerateWithFile(prompt string, fileReader io.Reader, fi
 	}
 
 	// Crear chat con el modelo Gemini
-	model := "gemini-2.5-flash"
+	if model == "" {
+		model = "gemini-3-flash-preview"
+	}
+
 	chat, err := client.Chats.Create(ctx, model, nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("error creando chat: %w", err)
@@ -176,7 +187,7 @@ func (s *geminiService) GenerateWithFile(prompt string, fileReader io.Reader, fi
 }
 
 // ProcessPromptAsync crea registro y lanza goroutine para procesamiento de texto
-func (s *geminiService) ProcessPromptAsync(prompt string) (string, error) {
+func (s *geminiService) ProcessPromptAsync(prompt string, model string) (string, error) {
 	id := genUUID()
 
 	proc := &models.GeminiProcessingDB{
@@ -187,11 +198,14 @@ func (s *geminiService) ProcessPromptAsync(prompt string) (string, error) {
 	if err := s.repo.CreateProcess(proc); err != nil {
 		return "", err
 	}
+	if model == "" {
+		model = "gemini-3-flash-preview"
+	}
 
 	go func(procID, p string) {
 		_ = s.repo.UpdateStatus(procID, models.StatusProcessing, "", "")
 
-		result, err := s.GenerateContent(p)
+		result, err := s.GenerateContent(p, model)
 		if err != nil {
 			_ = s.repo.UpdateStatus(procID, models.StatusError, "", err.Error())
 			return
@@ -203,7 +217,7 @@ func (s *geminiService) ProcessPromptAsync(prompt string) (string, error) {
 }
 
 // ProcessFileAsync crea registro y lanza goroutine para procesamiento con archivo
-func (s *geminiService) ProcessFileAsync(prompt, filename, mimeType string, fileContent []byte) (string, error) {
+func (s *geminiService) ProcessFileAsync(prompt, filename, mimeType string, fileContent []byte, model string) (string, error) {
 	id := genUUID()
 
 	proc := &models.GeminiProcessingFileDB{
@@ -218,10 +232,14 @@ func (s *geminiService) ProcessFileAsync(prompt, filename, mimeType string, file
 		return "", err
 	}
 
+	if model == "" {
+		model = "gemini-3-flash-preview"
+	}
+
 	go func(procID, fname, mtype, p string, content []byte) {
 		_ = s.repo.UpdateFileStatus(procID, models.StatusProcessing, "", "")
 
-		result, err := s.GenerateWithFile(p, bytes.NewReader(content), fname, mtype)
+		result, err := s.GenerateWithFile(p, bytes.NewReader(content), fname, mtype, model)
 		if err != nil {
 			_ = s.repo.UpdateFileStatus(procID, models.StatusError, "", err.Error())
 			return

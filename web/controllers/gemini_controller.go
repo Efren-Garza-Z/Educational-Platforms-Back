@@ -21,7 +21,7 @@ func NewGeminiController(s services.GeminiService) *GeminiController {
 // @Tags gemini
 // @Accept json
 // @Produce json
-// @Param requestBody body models.PromptRequest true "Prompt a procesar"
+// @Param requestBody body models.PromptRequest true "Prompt y modelo a procesar"
 // @Success 202 {object} models.GeminiProcessingIDResponse
 // @Failure 400 {object} map[string]string
 // @Router /gemini/process [post]
@@ -31,7 +31,7 @@ func (gc *GeminiController) ProcessPrompt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
 		return
 	}
-	id, err := gc.service.ProcessPromptAsync(req.Prompt)
+	id, err := gc.service.ProcessPromptAsync(req.Prompt, req.Model)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo iniciar proceso"})
 		return
@@ -66,12 +66,14 @@ func (gc *GeminiController) GetTaskStatus(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param prompt formData string true "Prompt"
+// @Param model formData string false "Modelo (opcional, por defecto gemini-3-flash-preview)"
 // @Param file formData file true "Archivo (pdf/png/jpg)"
 // @Success 202 {object} models.GeminiProcessingFileIDResponse
 // @Failure 400 {object} map[string]string
 // @Router /gemini/process-file [post]
 func (gc *GeminiController) ProcessFile(c *gin.Context) {
 	prompt := c.PostForm("prompt")
+	model := c.PostForm("model")
 	if prompt == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Prompt requerido"})
 		return
@@ -92,7 +94,7 @@ func (gc *GeminiController) ProcessFile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo leer archivo"})
 		return
 	}
-	id, err := gc.service.ProcessFileAsync(prompt, fileHeader.Filename, fileHeader.Header.Get("Content-Type"), content)
+	id, err := gc.service.ProcessFileAsync(prompt, fileHeader.Filename, fileHeader.Header.Get("Content-Type"), content, model)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo iniciar procesamiento de archivo"})
 		return

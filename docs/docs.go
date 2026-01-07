@@ -89,7 +89,7 @@ const docTemplate = `{
                 "summary": "Iniciar procesamiento de prompt",
                 "parameters": [
                     {
-                        "description": "Prompt a procesar",
+                        "description": "Prompt y modelo a procesar",
                         "name": "requestBody",
                         "in": "body",
                         "required": true,
@@ -136,6 +136,12 @@ const docTemplate = `{
                         "name": "prompt",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Modelo (opcional, por defecto gemini-3-flash-preview)",
+                        "name": "model",
+                        "in": "formData"
                     },
                     {
                         "type": "file",
@@ -239,7 +245,7 @@ const docTemplate = `{
                 "summary": "Iniciar tutoría de conversación con IA",
                 "parameters": [
                     {
-                        "description": "Mensaje del estudiante",
+                        "description": "Mensaje del estudiante y modelo opcional",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -724,6 +730,10 @@ const docTemplate = `{
             "properties": {
                 "conversation_id": {
                     "type": "string"
+                },
+                "model": {
+                    "type": "string",
+                    "example": "gemini-3-flash-preview"
                 },
                 "prompt": {
                     "type": "string",
