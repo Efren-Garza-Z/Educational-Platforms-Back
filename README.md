@@ -547,7 +547,7 @@ Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detall
 ## 📞 Contacto
 
 **Autor:** Efren David Garza Z.  
-**Email:** [Tu email aquí]  
+**Email:** [@Efren-DGZ(david.1308200@gmail.com)]  
 **GitHub:** [@Efren-Garza-Z](https://github.com/Efren-Garza-Z)
 
 ---
