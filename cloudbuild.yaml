@@ -1,0 +1,27 @@
+steps:
+  # Paso 1: Construir la imagen de Docker usando tu Dockerfile
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/app-image:$SHORT_SHA', '.']
+
+  # Paso 2: Subir la imagen a Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/app-image:$SHORT_SHA']
+
+  # Paso 3: Desplegar en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'educational-platforms-back' # Nombre de tu servicio
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/app-image:$SHORT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+# Las imágenes generadas se registran aquí para que Cloud Build sepa qué rastrear
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/app-image:$SHORT_SHA'
